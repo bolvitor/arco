@@ -3,7 +3,10 @@
     "description": "Proyecto MVC demo",
     "type": "project",
     "config": {
-        "platform-check": false
+        "platform-check": true,
+        "platform": {
+            "php" : "7.4.4"
+        }
     },
     "autoload": {
         "psr-4": {
@@ -17,6 +20,9 @@
         "mpdf/mpdf": "*",
         "phpmailer/phpmailer": "^6.6",
         "dompdf/dompdf": "^2.0",
-        "vlucas/phpdotenv": "^5.5"
+        "vlucas/phpdotenv": "^5.5",
+        "phpoffice/phpexcel": "^1.8",
+        "phpoffice/phpspreadsheet": "^1.12"
+
     }
 }
