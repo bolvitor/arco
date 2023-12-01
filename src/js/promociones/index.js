@@ -11,19 +11,19 @@ const arma = document.getElementById('per_arma')
 const btnBuscar = document.getElementById('btnBuscar');
 
 const botonRecargar = document.getElementById('btnLimpiar');
+const td_demerito = document.getElementById('td_demeritos');
+const td_punteo = document.getElementById('td_punteo');
 
 
 
-
-const datatable = new Datatable('#tablaPromociones', {
+let contador = 1;
+const datatablePromocion = new Datatable('#tablaPromociones', {
     language: lenguaje,
     data: null,
     columns: [
         {
             title: 'NO',
-            render: (data, type, row, meta) => {
-                return type === 'display' ? meta.row + 1 : meta.row + 1;
-            }
+            render: () => contador++
         },
 
         {
@@ -41,45 +41,52 @@ const datatable = new Datatable('#tablaPromociones', {
         },
         {
             title: 'Curso Ascenso',
-            data: 'cursoAscenso1'
+            data: 'promedio',
+            render: function (data, type, row) {
+                return data !== '' ? data : 'Pendiente';
+            }
         },
         {
             title: 'Eva_Desempeño',
-            data: 'desempenio'
+            data: 'resultado_final'
         },
         {
             title: 'Conducta Militar',
-            data: 'demeritos1'
+            data: 'punteo_demeritos'
         },
 
         {
             title: 'Aptitud Fisica',
-            data: 'pafeSQL'
+            data: 'suma_total'
         },
 
         {
             title: 'Perfil_Biofisico',
-            data: 'perfilBio1',
+            data: 'perfil_biofisico',
             render: function (data, type, row) {
-                if (parseFloat(data) === 1.66) {
-
-                    return '<span style="color: red;">' + data + '</span>';
-                } else {
-
-                    return data;
-                }
+                return data !== '' ? data : 'Pendiente';
             }
         },
 
         {
             title: 'Creditos',
-            data: 'Meritos1'
+            data: 'puntos_netos',
+            render: function (data, type, row) {
+                return data !== '' ? data : '0';
+            }
         },
 
 
         {
             title: 'punteo total',
-            data: 'punteo_total'
+            data: 'punteo_total',
+            render: function (data, type, row) {
+                if (type === 'display' || type === 'filter') {
+                    // Mostrar solo dos decimales en pantalla y en los filtros
+                    return data.toFixed(2);
+                }
+                return data; // Mantener el valor original para otros casos (ordenamiento, etc.)
+            }
         },
         {
             title: 'Ver Detalles',
@@ -104,12 +111,7 @@ const datatable = new Datatable('#tablaPromociones', {
 });
 
 
-
-
-
 const buscar = async () => {
-
-
     if (!validarFormulario(formulario, ['per_arma'])) {
         Swal.fire({
             icon: 'info',
@@ -122,19 +124,12 @@ const buscar = async () => {
     let per_promocion = formulario.per_promocion.value;
     let per_arma = arma.value;
 
-
     const url = `/arco/API/promocion/buscar?per_promocion=${per_promocion}&per_arma=${per_arma}`;
-    console.log(url);
-
     const config = {
         method: 'GET'
     };
 
     try {
-
-
-
-
         Swal.fire({
             title: 'Buscando...',
             html: '<div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; border-width: 0.4em;"><span class="sr-only"></span></div>',
@@ -142,76 +137,42 @@ const buscar = async () => {
             showCancelButton: true,
             allowOutsideClick: false,
             onBeforeOpen: () => {
-
-                Swal.showLoading();
+                const cancelButton = Swal.getCancelButton();
+                if (cancelButton) {
+                    cancelButton.disabled = true;
+                }
             }
         });
 
         const respuesta = await fetch(url, config);
         const data = await respuesta.json();
-        console.log('Datos recibidos:', data);
+        console.log('Datos recibidos en el js:', data);
 
-        datatable.clear().draw();
+        datatablePromocion.clear().draw();
 
-        // Obtener la longitud máxima de todos los arrays
-        const maxLength = Math.max(
-            data.usuarios.length,
-            data.cursoAscenso1.length,
-            data.meritos1.length,
-            data.demeritos1.length,
-            data.perfilBio1.length,
-            data.desempenio.length,
-            data.pafeSQL.length
-        );
-
-        for (let index = 0; index < maxLength; index++) {
-            const usuariosData = {
-                per_catalogo: data.usuarios[index] ? data.usuarios[index].per_catalogo : '',
-                grado: data.usuarios[index] ? data.usuarios[index].grado : '',
-                nombre: data.usuarios[index] ? data.usuarios[index].nombre : '',
-                cursoAscenso1: data.cursoAscenso1[index] ? (data.cursoAscenso1[index].promedio === '' ? '<span style="color: red;">Pendiente</span>' : parseFloat(data.cursoAscenso1[index].promedio)) : '',
-                Meritos1: data.meritos1[index] ? parseFloat(data.meritos1[index].puntos_netos) : 0,
-                demeritos1: data.demeritos1[index] ? parseFloat(data.demeritos1[index].punteo_demeritos) : 0,
-                perfilBio1: data.perfilBio1[index] ? (data.perfilBio1[index].perfil_biofisico === '' ? '<span style="color: red;">Pendiente</span>' : parseFloat(data.perfilBio1[index].perfil_biofisico)) : '',
-                desempenio: data.desempenio[index] ? (data.desempenio[index].resultado_final === '' ? 0 : parseFloat(data.desempenio[index].resultado_final)) : 0,
-                pafeSQL: data.pafeSQL[index] ? (data.pafeSQL[index].total_notas === '' ? 0 : parseFloat(data.pafeSQL[index].total_notas)) : 0,
-                punteo_total: (
-                    (
-                        (data.desempenio[index] ? (data.desempenio[index].resultado_final === '' ? 0 : parseFloat(data.desempenio[index].resultado_final)) : 0) +
-                        (data.meritos1[index] ? parseFloat(data.meritos1[index].puntos_netos) : 0) +
-                        (data.demeritos1[index] ? parseFloat(data.demeritos1[index].punteo_demeritos) : 0) +
-                        (data.cursoAscenso1[index] ? (data.cursoAscenso1[index].promedio !== '' ? parseFloat(data.cursoAscenso1[index].promedio) : 0) : 0) +
-                        (data.perfilBio1[index] ? (data.perfilBio1[index].perfil_biofisico === '' ? 0 : parseFloat(data.perfilBio1[index].perfil_biofisico)) : 0) +
-                        (data.pafeSQL[index] ? (data.pafeSQL[index].total_notas === '' ? 0 : parseFloat(data.pafeSQL[index].total_notas)) : 0)
-                    )
-                ).toFixed(2)
-            };
-
-
-            datatable.rows.add([usuariosData]).draw();
+        if (data && data.length > 0) {
+            contador = 1;
+            datatablePromocion.rows.add(data).draw();
         }
 
         Swal.fire({
-            icon: data.usuarios && data.usuarios.length > 0 ? 'success' : 'info',
-            title: data.usuarios && data.usuarios.length > 0 ? '¡Resultados obtenidos!' : 'Sin resultados',
-            text: data.usuarios && data.usuarios.length > 0 ? 'Se encontraron registros' : 'No se encontraron registros para la búsqueda',
-            didClose: () => {
-                Swal.close();
-            }
+            icon: data && data.length > 0 ? 'success' : 'info',
+            title: data && data.length > 0 ? '¡Resultados obtenidos!' : 'Sin resultados',
+            text: data && data.length > 0 ? 'Se encontraron registros' : 'No se encontraron registros para la búsqueda',
         });
 
     } catch (error) {
         console.log(error);
-      
-        Swal.close();
-
         Swal.fire({
             icon: 'error',
             title: '¡Error!',
-            text: 'Hubo un error durante la búsqueda <br> Intentelo de nuevo',
+            text: 'Hubo un error durante la búsqueda, Inténtelo de nuevo',
         });
+    } finally {
+        Swal.close(); // Cierra el modal de carga en cualquier caso (éxito o error)
     }
 };
+
 
 
 $('#tablaPromociones').on('click', '.btn-outline-dark', function () {
@@ -472,6 +433,11 @@ const buscarOficial = async (per_catalogo) => {
         tabladesempenio.clear().draw();
 
 
+        if (data.conducta) {
+            td_demerito.innerHTML = data.conducta[0]["demeritos"]
+
+            td_punteo.innerHTML = data.conducta[0]["punteo"]
+        }
         if (data.demeritos) {
             conta = 1
             tablademeritos.rows.add(data.demeritos).draw();
@@ -561,7 +527,7 @@ const modalVerExistencias = document.getElementById('verExistencias');
 const botonCerrarModal = document.querySelector('.modal-header .close');
 
 
-datatable.on('click', '.btn-outline-dark', () => {
+datatablePromocion.on('click', '.btn-outline-dark', () => {
 
     modalVerExistencias.classList.add('show');
     modalVerExistencias.style.display = 'block';

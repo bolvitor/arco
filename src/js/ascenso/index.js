@@ -54,64 +54,77 @@ exelInput.addEventListener('change', async function () {
 
 
 let contador = 1;
-const datatable = new Datatable('#tablaAscensos', {
+const datatableAscenso = new Datatable('#tablaAscensos', {
     language: lenguaje,
     data: null,
     columns: [
-        {
-            title: 'NO',
-            data: null,
-            render: (data, type, row, meta) => {
-
-                return type === 'display' ? contador + meta.row : contador + meta.row;
-            }
-        },
-        {
-            title: 'Catalogo',
-            data: 'per_catalogo'
-        },
-
-        {
-            title: 'Grado',
-            data: 'grado'
-        },
-        {
-            title: 'Nombre',
-            data: 'nombre'
-        },
-        {
-            title: 'Curso Ascenso',
-            data: 'cursoAscenso1'
-        },
-        {
-            title: 'Eva_Desempeño',
-            data: 'desempenio1'
-        },
-        {
-            title: 'Conducta Militar',
-            data: 'demeritos1'
-        },
-
-        {
-            title: 'Aptitud Fisica',
-            data: 'pafeSQL1'
-        },
-
-
-        {
-            title: 'Perfil_Biofisico',
-            data: 'perfilBio1'
-        },
-
-        {
-            title: 'Creditos',
-            data: 'Meritos1'
-        },
-
-        {
-            title: 'punteo total',
-            data: 'punteo_total'
-        },
+            {
+                title: 'NO',
+                render: () => contador++
+            },
+    
+            {
+                title: 'Catalogo',
+                data: 'per_catalogo'
+            },
+    
+            {
+                title: 'Grado',
+                data: 'grado'
+            },
+            {
+                title: 'Nombre',
+                data: 'nombre'
+            },
+            {
+                title: 'Curso Ascenso',
+                data: 'promedio',
+                render: function (data, type, row) {
+                    return data !== '' ? data : 'Pendiente';
+                }
+            },
+            {
+                title: 'Eva_Desempeño',
+                data: 'resultado_final'
+            },
+            {
+                title: 'Conducta Militar',
+                data: 'punteo_demeritos'
+            },
+    
+            {
+                title: 'Aptitud Fisica',
+                data: 'suma_total'
+            },
+    
+            {
+                title: 'Perfil_Biofisico',
+                data: 'perfil_biofisico',
+                render: function (data, type, row) {
+                    return data !== '' ? data : 'Pendiente';
+                }
+            },
+    
+            {
+                title: 'Creditos',
+                data: 'puntos_netos',
+                render: function (data, type, row) {
+                    return data !== '' ? data : '0';
+                }
+            },
+    
+    
+            {
+                title: 'punteo total',
+                data: 'punteo_total',
+                render: function (data, type, row) {
+                    if (type === 'display' || type === 'filter') {
+                        // Mostrar solo dos decimales en pantalla y en los filtros
+                        return data.toFixed(2);
+                    }
+                    return data; // Mantener el valor original para otros casos (ordenamiento, etc.)
+                }
+            },
         {
             title: 'Ver Detalles',
             render: (data, type, row) => {
@@ -130,8 +143,6 @@ const datatable = new Datatable('#tablaAscensos', {
             }
         }
     ],
-    order: [[10, 'desc']],
-
 });
 
 
@@ -210,87 +221,38 @@ const buscar = async () => {
                 if (cancelButton) {
                     cancelButton.disabled = true;
                 }
-
-                Swal.showLoading();
             }
         });
 
         const respuesta = await fetch(url, config);
         const data = await respuesta.json();
-        console.log('Datos recibidos:', data);
+        console.log('Datos recibidos en el js:', data);
 
-        datatable.clear().draw();
+        datatableAscenso.clear().draw();
 
-
-        const maxLength = Math.max(
-            data.usuarios1.length,
-            data.cursoAscenso1.length,
-            data.meritos1.length,
-            data.demeritos1.length,
-            data.perfilBio1.length,
-            data.desempenio1.length,
-            data.pafeSQL1.length
-        );
-
-
-        for (let index = 0; index < maxLength; index++) {
-            if (signal.aborted) {
-                console.log('Búsqueda cancelada');
-                break;
-            }
-            const usuariosData = {
-
-                per_catalogo: data.usuarios1[index] ? data.usuarios1[index].per_catalogo : '',
-                grado: data.usuarios1[index] ? data.usuarios1[index].grado : '',
-                nombre: data.usuarios1[index] ? data.usuarios1[index].nombre : '',
-                cursoAscenso1: data.cursoAscenso1[index] ? (data.cursoAscenso1[index].promedio === '' ? 'Pendiente' : parseFloat(data.cursoAscenso1[index].promedio)) : '',
-                Meritos1: data.meritos1[index] ? parseFloat(data.meritos1[index].puntos_netos) : 0,
-                demeritos1: data.demeritos1[index] ? parseFloat(data.demeritos1[index].punteo_demeritos) : 0,
-                perfilBio1: data.perfilBio1[index] ? (data.perfilBio1[index].perfil_biofisico === '' ? 'Pendiente' : parseFloat(data.perfilBio1[index].perfil_biofisico)) : '',
-                desempenio1: data.desempenio1[index] ? (data.desempenio1[index].resultado_final === '' ? 0 : parseFloat(data.desempenio1[index].resultado_final)) : 0,
-                pafeSQL1: data.pafeSQL1[index] ? (data.pafeSQL1[index].suma_total === '' ? 0 : parseFloat(data.pafeSQL1[index].suma_total)) : 0,
-                punteo_total: (
-                    (
-                        (data.desempenio1[index] ? (data.desempenio1[index].resultado_final === '' ? 0 : parseFloat(data.desempenio1[index].resultado_final)) : 0) +
-                        (data.meritos1[index] ? parseFloat(data.meritos1[index].puntos_netos) : 0) +
-                        (data.demeritos1[index] ? parseFloat(data.demeritos1[index].punteo_demeritos) : 0) +
-                        (data.cursoAscenso1[index] ? (data.cursoAscenso1[index].promedio !== '' ? parseFloat(data.cursoAscenso1[index].promedio) : 0) : 0) +
-                        (data.perfilBio1[index] ? (data.perfilBio1[index].perfil_biofisico === '' ? 0 : parseFloat(data.perfilBio1[index].perfil_biofisico)) : 0) +
-                        (data.pafeSQL1[index] ? (data.pafeSQL1[index].suma_total === '' ? 0 : parseFloat(data.pafeSQL1[index].suma_total)) : 0)
-                    )
-                ).toFixed(2)
-            };
-
-            datatable.rows.add([usuariosData]).draw();
+        if (data && data.length > 0) {
+            contador = 1;
+            datatableAscenso.rows.add(data).draw();
         }
-        Swal.fire({
-            icon: data.usuarios1 && data.usuarios1.length > 0 ? 'success' : 'info',
-            title: data.usuarios1 && data.usuarios1.length > 0 ? '¡Resultados obtenidos!' : 'Sin resultados',
-            text: data.usuarios1 && data.usuarios1.length > 0 ? 'Se encontraron registros' : 'No se encontraron registros para la búsqueda',
-            didClose: () => {
 
-                Swal.close();
-            }
+        Swal.fire({
+            icon: data && data.length > 0 ? 'success' : 'info',
+            title: data && data.length > 0 ? '¡Resultados obtenidos!' : 'Sin resultados',
+            text: data && data.length > 0 ? 'Se encontraron registros' : 'No se encontraron registros para la búsqueda',
         });
-        btnPdf.style.display = '';
-        btnexcel.style.display = '';
 
     } catch (error) {
-
-        if (error.name === 'AbortError') {
-
-            console.log('Búsqueda cancelada');
-        } else {
-            console.error(error);
-
-            Swal.fire({
-                icon: 'error',
-                title: '¡Error!',
-                text: 'Hubo un error durante la búsqueda. Intentelo de nuevo',
-            });
-        }
+        console.log(error);
+        Swal.fire({
+            icon: 'error',
+            title: '¡Error!',
+            text: 'Hubo un error durante la búsqueda, Inténtelo de nuevo',
+        });
+    } finally {
+        Swal.close(); // Cierra el modal de carga en cualquier caso (éxito o error)
     }
 };
+
 
 
 $('#tablaAscensos').on('click', '.btn-outline-dark', function () {
@@ -647,7 +609,7 @@ const modalVerExistencias = document.getElementById('verExistencias');
 const botonCerrarModal = document.querySelector('.modal-header .close');
 
 
-datatable.on('click', '.btn-outline-dark', () => {
+datatableAscenso.on('click', '.btn-outline-dark', () => {
 
     modalVerExistencias.classList.add('show');
     modalVerExistencias.style.display = 'block';

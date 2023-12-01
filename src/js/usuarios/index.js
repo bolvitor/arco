@@ -8,6 +8,8 @@ import { lenguaje } from "../lenguaje";
 const formulario = document.querySelector('#formularioUsuarios');
 const btnBuscar = document.getElementById('btnBuscar');
 const botonRecargar = document.getElementById('btnLimpiar');
+const td_demerito = document.getElementById('td_demeritos');
+const td_punteo = document.getElementById('td_punteo');
 
 let contador = 1;
 const datatable = new Datatable('#tablaUsuarios', {
@@ -132,7 +134,7 @@ const buscar = async () => {
             datatable.clear().draw();
             datatable.rows.add([userData]).draw();
 
-            Swal.fire({
+            Toast.fire({
                 icon: 'success',
                 title: '¡Resultados obtenidos!',
                 text: 'Se encontraron registros',
@@ -404,6 +406,12 @@ const buscarOficial = async (evento) => {
         tablaperfilBio.clear().draw();
         tabladesempenio.clear().draw();
 
+
+        if (data.conducta) {
+            td_demerito.innerHTML = data.conducta[0]["demeritos"]
+
+            td_punteo.innerHTML = data.conducta[0]["punteo"]
+        }
 
         if (data.demeritos) {
             conta = 1

@@ -274,6 +274,16 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <table id="tablatotaldemeritos" class="table table-bordered table-hover w-100">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><b>Total Deméritos<b></td>
+                                                            <td id="td_demeritos"></td>
+                                                            <td><b>Punteo<b></td>
+                                                            <td id="td_punteo"></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
 
                                                 <div class="row justify-content-center">
                                                     <div class="col table-responsive" style="padding: 20px;  box-shadow: 0 4px 8px rgba(0, 128, 255, 0.3), 0 6px 20px rgba(0, 0, 0, 0.1); margin-top: 10px;">

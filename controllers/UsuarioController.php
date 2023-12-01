@@ -320,7 +320,7 @@ class UsuarioController
         $ObtenerMeritos = " SELECT
        mper.per_catalogo,
        CASE WHEN SUM(total_meritos) IS NULL THEN 0 ELSE SUM(total_meritos) END AS total_meritos,
-       (CASE WHEN SUM(total_meritos) IS NULL THEN 0 ELSE SUM(total_meritos) END / 100 * 5) AS puntos_netos
+       ROUND((CASE WHEN SUM(total_meritos) IS NULL THEN 0 ELSE SUM(total_meritos) END / 100 * 5),2 ) AS puntos_netos
         FROM mper
         LEFT JOIN (
             SELECT
@@ -579,7 +579,45 @@ class UsuarioController
             $anioBase = $resultado['anio'];
             $mesBase = $resultado['mes'];
         }
+        $sqlconducta = "SELECT
+        per_catalogo,
+        per_grado,
+        CASE
+                WHEN demeritos IS NOT NULL THEN demeritos
+                ELSE 0
+            END AS demeritos,
+        est_catalogo,
+        CASE
+            WHEN demeritos IS NOT NULL THEN
+                CASE
+                    WHEN per_grado IN (41, 40, 47, 46, 60, 59, 65, 66) THEN ROUND((30 - (demeritos * 30 / 150)), 2)
+                    WHEN per_grado IN (74, 73, 82, 81) THEN ROUND((25 - (demeritos * 25 / 100)), 2)
+                    WHEN per_grado IN (89, 88) THEN ROUND((20 - (demeritos * 20 / 100)), 2)
+                END
+            ELSE
+                CASE
+                    WHEN per_grado IN (41, 40, 47, 46, 60, 59, 65, 66) THEN 30
+                    WHEN per_grado IN (74, 73, 82, 81) THEN 25
+                    WHEN per_grado IN (89, 88) THEN 20
+                END
+        END AS punteo
+        FROM mper
+        LEFT JOIN (
+            SELECT
+                est_catalogo,
+                est_demeritos AS demeritos
+            FROM
+                psan_estadistica
+                WHERE est_grado = '$grado'
+            ) ON per_catalogo = est_catalogo
+        INNER JOIN grados ON per_grado = gra_codigo
+        WHERE gra_clase = 1
+        AND per_catalogo = '$catalogoOficial'
+        AND per_situacion = 11
+        AND per_grado = '$grado'";
 
+
+        $conducta = Usuario::fetchArray($sqlconducta);
 
         $sql1 = " SELECT det_catalogo, gra_desc_md AS grado, det_fecha as fecha, san_descripcion as descripcion,
         CASE
@@ -603,7 +641,7 @@ class UsuarioController
         cur_desc_lg AS descripcion,
         cur_punteo,
         cur_fec_fin,
-        CASE
+        ROUND( CASE
             WHEN cur_curso = 3200 THEN cur_punteo * 20 / 100
             WHEN cur_curso IN (750, 751, 752, 753, 754, 755, 756, 777, 778, 781, 1020, 1099) THEN cur_punteo * 20 / 100
             WHEN cur_curso = 3201 THEN cur_punteo * 20 / 100
@@ -611,7 +649,7 @@ class UsuarioController
             WHEN cur_curso = 710 THEN cur_punteo * 20 / 100
             WHEN cur_curso = 43 THEN cur_punteo * 15 / 100
             ELSE NULL
-        END AS promedio
+        END,2 ) AS promedio
         FROM dcur
         INNER JOIN cursos ON dcur.cur_curso = cursos.cur_codigo
         WHERE dcur.cur_curso IN (3200, 750, 751, 752, 753, 754, 755, 756, 777, 778, 781, 783, 1020, 1099, 3201, 784, 710, 43)
@@ -877,6 +915,8 @@ class UsuarioController
             }
         }
 
+ 
+
         try {
 
             $responseData = [
@@ -885,7 +925,8 @@ class UsuarioController
                 'meritos' => $meritos,
                 'pafes' => $pafes,
                 'perfilBio' => $perfilBio,
-                'desempenio' => $desempenio
+                'desempenio' => $desempenio,
+                'conducta' => $conducta
             ];
 
             // Convertir el arreglo asociativo en JSON

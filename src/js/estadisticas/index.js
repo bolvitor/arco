@@ -1,7 +1,11 @@
+
+import { validarFormulario, Toast, confirmacion } from "../funciones";
+import Datatable from "datatables.net-bs5";
+import { lenguaje } from "../lenguaje";
 import { Dropdown } from "bootstrap";
 import Swal from "sweetalert2";
 import Chart from "chart.js/auto";
-// import { Toast } from "../js/funciones";
+
 
 const canvaspromocion = document.getElementById("chartPromocion");
 
@@ -77,9 +81,7 @@ const getPromocion = async () => {
 
         const nombre = registro.nombre;
         const total= registro.total;
-        const postergados = registro.postergados;
-        const ascendidos = registro.ascendidos;
-
+   
         chartPromocion.data.labels.push(nombre);
         chartPromocion.data.datasets[0].data.push(total);
         
@@ -92,11 +94,6 @@ const getPromocion = async () => {
     console.log(error);
   }
 };
-
-
-
-
-
 
 const chartPostergado = new Chart(contextpostergado, {
   type: "bar",
@@ -171,7 +168,8 @@ const getPostergados = async () => {
   }
 };
 
-
-  btnBuscar.addEventListener('click', getPromocion);
-  btnBuscar.addEventListener('click', getPostergados);
-
+btnBuscar.addEventListener('click', () => {
+  
+  getPromocion();
+  getPostergados();
+});

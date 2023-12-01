@@ -58,11 +58,9 @@ class PromocionController
         AND mper.per_situacion = 11";
 
         if (!empty($arma)) {
-            // Agregar la condición si la variable $arma no está vacía
-            $sql .= " AND mper.per_arma = '$arma'";
-        }
 
-        $sql .= " ORDER BY per_grado DESC";
+            $sql .= " AND mper.per_arma = '$arma'";
+        };
 
         $usuarios = Usuario::fetchArray($sql);
 
@@ -78,7 +76,7 @@ class PromocionController
                 'grado' => $grado,
                 'catalogo' => $catalogoOficial,
             ];
-        }
+        };
 
 
         foreach ($gradosCatalogos as $item) {
@@ -89,7 +87,7 @@ class PromocionController
             $meritos = "SELECT
             mper.per_catalogo,
             CASE WHEN SUM(total_meritos) IS NULL THEN 0 ELSE SUM(total_meritos) END AS total_meritos,
-            (CASE WHEN SUM(total_meritos) IS NULL THEN 0 ELSE SUM(total_meritos) END / 100 * 5) AS puntos_netos
+            ROUND((CASE WHEN SUM(total_meritos) IS NULL THEN 0 ELSE SUM(total_meritos) END / 100 * 5),2 ) AS puntos_netos
             FROM mper
             LEFT JOIN (
                 SELECT
@@ -143,17 +141,10 @@ class PromocionController
 
             $meritos = Usuario::fetchArray($meritos);
 
-            foreach ($meritos as $resultado) {
-                $puntos_netos = $resultado['puntos_netos'];
-                $catalogo = $resultado['per_catalogo'];
-
-
-                $meritos1[] = [
-                    'puntos_netos' => $puntos_netos,
-                    'catalogo' => $catalogo,
-                ];
+            if (!empty($meritos)) {
+                $meritos1[] = $meritos[0];
             }
-        }
+        };
 
 
         foreach ($gradosCatalogos as $item) {
@@ -167,7 +158,7 @@ class PromocionController
             LEFT JOIN (
             SELECT 
                 cur_catalogo,
-                CASE
+                ROUND( CASE
                     WHEN cur_curso = 3200 THEN cur_punteo * 20 / 100
                     WHEN cur_curso IN (750, 751, 752, 753, 754, 755, 756, 777, 778, 781, 1020, 1099) THEN cur_punteo * 20 / 100
                     WHEN cur_curso = 3201 THEN cur_punteo * 20 / 100
@@ -175,7 +166,7 @@ class PromocionController
                     WHEN cur_curso = 710 THEN cur_punteo * 20 / 100
                     WHEN cur_curso = 43 THEN cur_punteo * 15 / 100
                     ELSE NULL
-                END AS promedio
+                END, 2) AS promedio
             FROM dcur
             INNER JOIN cursos ON dcur.cur_curso = cursos.cur_codigo
             WHERE dcur.cur_curso IN (3200, 750, 751, 752, 753, 754, 755, 756, 777, 778, 781, 783, 1020, 1099, 3201, 784, 710, 43)
@@ -191,18 +182,12 @@ class PromocionController
 
             $cursoAscenso = Usuario::fetchArray($cursoAscenso);
 
-            foreach ($cursoAscenso as $resultado) {
-                $catalogo = $resultado['per_catalogo'];
-                $promedio = $resultado['promedio'];
-
-
-                // Agrega los grados y catálogos al array
-                $cursoAscenso1[] = [
-                    'promedio' => $promedio,
-                    'catalogo' => $catalogo,
-                ];
+            if (!empty($cursoAscenso)) {
+                $cursoAscenso1[] = $cursoAscenso[0];
             }
-        }
+        };
+
+
 
         foreach ($gradosCatalogos as $item) {
             $grado = $item['grado'];
@@ -227,17 +212,11 @@ class PromocionController
             $perfilBio = Usuario::fetchArray($perfilBio);
 
 
-            foreach ($perfilBio as $resultado) {
-                $catalogo = $resultado['per_catalogo'];
-                $perfil_biofisico = $resultado['perfil_biofisico'];
-
-
-                $perfilBio1[] = [
-                    'perfil_biofisico' => $perfil_biofisico,
-                    'catalogo' => $catalogo,
-                ];
+            if (!empty($perfilBio)) {
+                $perfilBio1[] = $perfilBio[0];
             }
-        }
+        };
+
 
         foreach ($gradosCatalogos as $item) {
             $grado = $item['grado'];
@@ -279,19 +258,10 @@ class PromocionController
 
             $demeritos = Usuario::fetchArray($demeritos);
 
-            foreach ($demeritos as $resultado) {
-                $catalogo = $resultado['per_catalogo'];
-                $punteo_demeritos = $resultado['punteo_demeritos'];
-
-
-                // Agrega los grados y catálogos al array
-                $demeritos1[] = [
-                    'punteo_demeritos' => $punteo_demeritos,
-                    'catalogo' => $catalogo,
-                ];
+            if (!empty($demeritos)) {
+                $demeritos1[] = $demeritos[0];
             }
-        }
-
+        };
 
 
 
@@ -321,7 +291,7 @@ class PromocionController
 
                     $fechaBase = date('Y-m-d', strtotime('first day of January', $fechaEnero));
                 }
-            }
+            };
 
 
             if ($grado == 41 || $grado == 47) {
@@ -454,16 +424,8 @@ class PromocionController
 
             $resultadoConsulta = Usuario::fetchArray($pafeSQL);
 
-            foreach ($resultadoConsulta as $resultado) {
-                $grado = $resultado['per_grado'];
-                $catalogo = $resultado['per_catalogo'];
-                $totalNotas = $resultado['suma_total'];
-
-                $resultadopafe[] = [
-                    'grado' => $grado,
-                    'catalogo' => $catalogo,
-                    'total_notas' => $totalNotas,
-                ];
+            if (!empty($resultadoConsulta)) {
+                $resultadopafe[] = $resultadoConsulta[0];
             }
         }
 
@@ -644,47 +606,52 @@ class PromocionController
 
             $resultadodesempenio = Usuario::fetchArray($desempenio);
 
-            foreach ($resultadodesempenio as $resultado) {
-                $catalogo = $resultado['per_catalogo'];
-                $resultado_final = $resultado['resultado_final'];
-
-
-                // Agrega los resultados de esta  al array de resultados
-                $resultadoeva[] = [
-
-                    'catalogo' => $catalogo,
-                    'resultado_final' => $resultado_final,
-
-                ];
+            if (!empty($resultadodesempenio)) {
+                $resultadoeva[] = $resultadodesempenio[0];
             }
-        }
+        };
 
 
-        $conditions = [];
+            // Unir los arrays para formar una sola fila y sumar las notas para obtener el punteo_final
+            foreach ([$usuarios, $perfilBio1, $cursoAscenso1, $meritos1, $demeritos1, $resultadopafe, $resultadoeva] as $dataset) {
+                foreach ($dataset as $entry) {
+                    $perCatalogo = $entry['per_catalogo'];
 
+                    if (!isset($combinarDatos[$perCatalogo])) {
+                        $combinarDatos[$perCatalogo] = $entry;
+                        $combinarDatos[$perCatalogo]['punteo_total'] = 0;
+                    }
 
-        if (!empty($per_promocion)) {
-            $conditions[] = "mper.per_promocion = '$per_promocion'";
-        }
+                    // Realizar las sumas como números
+                    $combinarDatos[$perCatalogo]['punteo_total'] += (
+                        floatval($entry['resultado_final']) +
+                        floatval($entry['puntos_netos']) +
+                        floatval($entry['punteo_demeritos']) +
+                        floatval($entry['promedio']) +
+                        floatval($entry['perfil_biofisico']) +
+                        floatval($entry['suma_total'])
+                    );
 
+                    foreach ($entry as $key => $value) {
+                        if ($key !== 'punteo_total' && !isset($combinarDatos[$perCatalogo][$key])) {
+                            $combinarDatos[$perCatalogo][$key] = $value;
+                        }
+                    }
+                }
+            }
 
-        if (!empty($conditions)) {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        }
+            array_walk($combinarDatos, function (&$entry) {
+                $entry['punteo_total'] = floatval($entry['punteo_total']);
+            });
 
-        try {
+            // Ordenar el array $combinarDatos utilizando la columna 'punteo_total' de mayor a menor
+            usort($combinarDatos, function ($a, $b) {
+                return $b['punteo_total'] <=> $a['punteo_total'];
+            });
 
-            $responseData = [
-                'usuarios' => $usuarios,
-                'perfilBio1' => $perfilBio1,
-                'cursoAscenso1' => $cursoAscenso1,
-                'meritos1' => $meritos1,
-                'demeritos1' => $demeritos1,
-                'pafeSQL' => $resultadopafe,
-                'desempenio' => $resultadoeva,
-            ];
+            try {
 
-            echo json_encode($responseData);
+            echo json_encode($combinarDatos);
             exit;
         } catch (Exception $e) {
             echo json_encode([
@@ -694,7 +661,6 @@ class PromocionController
             ]);
         }
     }
-
 
 
 
@@ -795,12 +761,54 @@ class PromocionController
 
         $demeritos = Usuario::fetchArray($sql1);
 
+
+        //Obtener total demeritos y punteo promedio//
+        $sqlconducta = "SELECT
+        per_catalogo,
+        per_grado,
+        CASE
+                WHEN demeritos IS NOT NULL THEN demeritos
+                ELSE 0
+            END AS demeritos,
+        est_catalogo,
+        CASE
+            WHEN demeritos IS NOT NULL THEN
+                CASE
+                    WHEN per_grado IN (41, 40, 47, 46, 60, 59, 65, 66) THEN ROUND((30 - (demeritos * 30 / 150)), 2)
+                    WHEN per_grado IN (74, 73, 82, 81) THEN ROUND((25 - (demeritos * 25 / 100)), 2)
+                    WHEN per_grado IN (89, 88) THEN ROUND((20 - (demeritos * 20 / 100)), 2)
+                END
+            ELSE
+                CASE
+                    WHEN per_grado IN (41, 40, 47, 46, 60, 59, 65, 66) THEN 30
+                    WHEN per_grado IN (74, 73, 82, 81) THEN 25
+                    WHEN per_grado IN (89, 88) THEN 20
+                END
+        END AS punteo
+        FROM mper
+        LEFT JOIN (
+            SELECT
+                est_catalogo,
+                est_demeritos AS demeritos
+            FROM
+                psan_estadistica
+                WHERE est_grado = '$grado'
+            ) ON per_catalogo = est_catalogo
+        INNER JOIN grados ON per_grado = gra_codigo
+        WHERE gra_clase = 1
+        AND per_catalogo = '$catalogoOficial'
+        AND per_situacion = 11
+        AND per_grado = '$grado'";
+
+
+        $conducta = Usuario::fetchArray($sqlconducta);
+
         $sql2 = "  SELECT 
         cur_catalogo,
         cur_desc_lg AS descripcion,
         cur_punteo,
         cur_fec_fin,
-        CASE
+        ROUND( CASE
             WHEN cur_curso = 3200 THEN cur_punteo * 20 / 100
             WHEN cur_curso IN (750, 751, 752, 753, 754, 755, 756, 777, 778, 781, 1020, 1099) THEN cur_punteo * 20 / 100
             WHEN cur_curso = 3201 THEN cur_punteo * 20 / 100
@@ -808,13 +816,17 @@ class PromocionController
             WHEN cur_curso = 710 THEN cur_punteo * 20 / 100
             WHEN cur_curso = 43 THEN cur_punteo * 15 / 100
             ELSE NULL
-        END AS promedio
+        END,2 ) AS promedio
         FROM dcur
         INNER JOIN cursos ON dcur.cur_curso = cursos.cur_codigo
         WHERE dcur.cur_curso IN (3200, 750, 751, 752, 753, 754, 755, 756, 777, 778, 781, 783, 1020, 1099, 3201, 784, 710, 43)
         AND cur_grado = '$grado'
         AND cur_catalogo = '$catalogoOficial'
         AND cur_fec_fin = (SELECT MAX(cur_fec_fin) FROM dcur WHERE cur_catalogo = '$catalogoOficial')";
+
+
+
+
 
         $cursoAscenso = Usuario::fetchArray($sql2);
 
@@ -1085,7 +1097,8 @@ class PromocionController
                 'meritos' => $meritos,
                 'pafes' => $pafes,
                 'perfilBio' => $perfilBio,
-                'desempenio' => $desempenio
+                'desempenio' => $desempenio,
+                'conducta' => $conducta
             ];
 
             // Convertir el arreglo asociativo en JSON
@@ -1104,7 +1117,7 @@ class PromocionController
 
     public static function llenarFormulario()
     {
-   
+
 
         $catalogoOficial = $_GET['per_catalogo'];
 

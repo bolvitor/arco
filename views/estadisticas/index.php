@@ -105,7 +105,7 @@
                             <label for="inputPromocion">Promoción</label>
                             <input type="number" class="form-control" id="inputPromocion" name="btnPromocion">
                         </div>
-                        <button id="btnBuscar" class="btn btn-outline-info" > Buscar</button>
+                        <button type="button" id="btnBuscar" class="btn btn-outline-info" > Buscar</button>
                     </form>
                 </div>
             </div>

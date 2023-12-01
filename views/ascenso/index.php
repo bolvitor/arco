@@ -156,13 +156,7 @@
             </form>
         </div>
 
-
-
-
-
-
-
-
+        <!--Datatable-->
         <div class="row justify-content-center">
             <div class="col table-responsive" style="max-width: 90%; padding: 40px; background-color: #f8f9fa; box-shadow: 0 4px 8px rgba(0, 128, 255, 0.3), 0 6px 20px rgba(0, 0, 0, 0.1); margin-top: 20px;">
                 <table id="tablaAscensos" class="container p-4 shadow-lg style, table table-bordered table-hover" style="width: 100%; border-collapse: collapse;">
@@ -313,10 +307,9 @@
                                                             <table id="tablatotaldemeritos" class="table table-bordered table-hover w-100">
                                                                 <tbody>
                                                                     <tr>
-                                                                        <td><br>Total Deméritos<b></td>
-                                                                        
+                                                                        <td><b>Total Deméritos<b></td>
                                                                         <td id="td_demeritos"></td>
-                                                                        <td><br>Punteo<br></td>
+                                                                        <td><b>Punteo<b></td>
                                                                         <td id="td_punteo"></td>
                                                                     </tr>
                                                                 </tbody>
