@@ -63,6 +63,12 @@
                 Estadisticas
             </a>
         </div>
+        <div class="nav-item d-flex">
+            <a class="dropdown-item nav-link bg-dark text-white" href="/arco/creditos">
+                <img src="./images/mantenimiento.png" alt="Ícono Formulario" class="menu-icon" style="width: 1cm; height: 1cm; border: none;">
+                Meritos
+            </a>
+        </div>
     </ul>
 </div>
 
@@ -74,7 +80,7 @@
                 </ul> 
                 <div class="col-lg-1 d-grid mb-lg-0 mb-2">
                     <!-- Ruta relativa desde el archivo donde se incluye menu.php -->
-                    <a href="/menu/" class="btn btn-danger"><i class="bi bi-arrow-bar-left"></i>MENÚ</a>
+                    <a href="/menu/" class="btn btn-danger"><i class="bi bi-arrow-bar-left"></i>SALIR</a>
                 </div>
 
             

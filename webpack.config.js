@@ -11,6 +11,7 @@ module.exports = {
     'js/escalafon/index' : './src/js/escalafon/index.js',
     'js/ascenso/index' : './src/js/ascenso/index.js',
     'js/estadisticas/index' : './src/js/estadisticas/index.js',
+    'js/creditos/index' : './src/js/creditos/index.js',
   },
   output: {
     filename: '[name].js',

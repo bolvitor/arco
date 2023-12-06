@@ -251,6 +251,9 @@ const buscar = async () => {
     } finally {
         Swal.close(); // Cierra el modal de carga en cualquier caso (éxito o error)
     }
+    btnPdf.style.display = ''; 
+    btnexcel.style.display = '';
+
 };
 
 

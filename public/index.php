@@ -11,6 +11,7 @@ use Controllers\AscensoController;
 use Controllers\EstadisticaController;
 use Controllers\ReporteController;
 use Controllers\Reporte2Controller;
+use Controllers\CreditosController;
 
 $router = new Router();
 $router->setBaseURL('/' . $_ENV['APP_NAME']);
@@ -51,6 +52,14 @@ $router->get('/resultado', [Reporte2Controller::class, 'excel']);
 $router->get('/estadisticas', [EstadisticaController::class,'index'] );
 $router->get('/API/estadisticas/getPromocion', [EstadisticaController::class, 'graficas']);
 $router->get('/API/estadisticas/getPostergados', [EstadisticaController::class, 'graficas2']);
+
+
+
+$router->get('/creditos', [CreditosController::class,'index'] );
+// $router->post('/API/creditos/guardar', [CreditosController::class,'guardarAPI'] );
+$router->post('/API/creditos/modificar', [CreditosController::class,'modificarAPI'] );
+$router->post('/API/creditos/eliminar', [CreditosController::class,'eliminarAPI'] );
+$router->get('/API/creditos/buscar', [CreditosController::class,'buscarAPI'] );
 
 
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador

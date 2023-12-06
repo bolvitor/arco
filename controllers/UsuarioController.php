@@ -47,8 +47,7 @@ class UsuarioController
 
     public static function buscarAPI()
     {
-        // Definir las variables para los parámetros de búsqueda
-        $per_catalogo = $_GET['per_catalogo'];
+       
         $catalogoOficial = $_GET['per_catalogo'];
 
 
@@ -56,9 +55,7 @@ class UsuarioController
         $grado = Usuario::fetchFirst($ObtenerGrado);
 
         $grado = $grado['per_grado'];
-
-
-        //Determinar si el oficial esta postergado//
+ 
         $postergado = "SELECT per_catalogo, current not between t_ult_asc and to_date(t_prox_asc, '%d/%m/%Y') as postergado 
         FROM TIEMPOS INNER JOIN MPER ON t_catalogo = per_catalogo WHERE  t_catalogo = '$catalogoOficial'";
 
@@ -74,7 +71,6 @@ class UsuarioController
             $mesActual = (int) date('m', $fechaActual);
             $fechaEnero = strtotime('+1 year', strtotime('first day of January'));
             $fechaJunio = strtotime('first day of June');
-
             if ($mesActual >= 2 && $mesActual <= 5) {
 
                 $fechaBase = date('Y-m-d', strtotime('first day of June'));
@@ -109,13 +105,13 @@ class UsuarioController
         if ($postergado === 0) {
 
             $Obteneranio = "SELECT
-                        CASE
-                            WHEN MONTH(t_ult_asc) = 12 THEN YEAR(t_ult_asc) + 1
-                            ELSE YEAR(t_ult_asc)
-                        END AS anio,
-                        MONTH(t_ult_asc) AS mes
-                        FROM tiempos
-                        WHERE t_catalogo = '$catalogoOficial'";
+                CASE
+                    WHEN MONTH(t_ult_asc) = 12 THEN YEAR(t_ult_asc) + 1
+                    ELSE YEAR(t_ult_asc)
+                END AS anio,
+                MONTH(t_ult_asc) AS mes
+                FROM tiempos
+                WHERE t_catalogo = '$catalogoOficial'";
 
             $resultado = Usuario::fetchFirst($Obteneranio);
 
@@ -216,8 +212,8 @@ class UsuarioController
             AND per_situacion = 11 ";
 
 
-           
-    
+
+
 
         //cantidad de periodos de las evaluaciones de desempeño por grado//
         $gradosPeriodos = [
@@ -315,8 +311,8 @@ class UsuarioController
         AND per_situacion = 11
         AND per_catalogo = '$catalogoOficial'";
 
-      
-        
+
+
         $ObtenerMeritos = " SELECT
        mper.per_catalogo,
        CASE WHEN SUM(total_meritos) IS NULL THEN 0 ELSE SUM(total_meritos) END AS total_meritos,
@@ -372,7 +368,7 @@ class UsuarioController
         AND mper.per_catalogo = '$catalogoOficial'
         GROUP BY mper.per_catalogo ";
 
-   
+
         $punteoCurso = "SELECT 
         mper.per_catalogo,
         promedio
@@ -455,32 +451,13 @@ class UsuarioController
                     AND mper.per_catalogo = '$catalogoOficial'
                     AND mper.per_situacion = 11";
 
-
-
-
-
-        $conditions = [];
-
-
-        if (!empty($per_catalogo)) {
-            $conditions[] = "mper.per_catalogo = '$per_catalogo'";
-        }
-
-        if (!empty($per_promocion)) {
-            $conditions[] = "mper.per_promocion = '$per_promocion'";
-        }
-
-        if (!empty($conditions)) {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        }
-
-
         try {
             $usuarios = Usuario::fetchArray($sql);
             $Curso = Usuario::fetchFirst($punteoCurso);
             $Meritos = Usuario::fetchFirst($ObtenerMeritos);
             $pafeSQL = Usuario::fetchFirst($pafeSQL);
             $desempenio = Usuario::fetchFirst($desempenio);
+
 
             $responseData = [
                 'usuarios' => $usuarios,
@@ -915,7 +892,7 @@ class UsuarioController
             }
         }
 
- 
+
 
         try {
 
